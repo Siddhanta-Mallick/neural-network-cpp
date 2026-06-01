@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "layers/SeqDenseLayer.hpp"
+#include "core/ActivationFunctions.hpp"
 
 using std::cout, std::endl;
 
@@ -40,6 +41,20 @@ void SeqDenseLayer::printLayer(int layerId)
 
 std::vector<float> SeqDenseLayer::forward(std::vector<float> &input)
 {
+    // TODO : rightnow all layers use sigmoid, create a new class member to store which activation function is to be used.
+    if (input.size() != inputCount)
+        throw std::runtime_error("Dimensions of input and weight matrix do not match");
+
+    std::vector<float> y(neuronCount, 0.0);
+    for (unsigned int i = 0; i < neuronCount; ++i)
+    {
+        for (unsigned int j = 0; j < inputCount; ++j)
+            y[i] += input[j] * weightMatrix[i][j];
+        y[i] += bias[i];
+        y[i] = Activation::Sigmoid(y[i]);
+    }
+
+    return y;
 }
 std::vector<float> SeqDenseLayer::backward(std::vector<float> gradOutput)
 {
