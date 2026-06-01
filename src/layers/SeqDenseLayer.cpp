@@ -39,7 +39,7 @@ void SeqDenseLayer::printLayer(int layerId)
     }
 }
 
-std::vector<float> SeqDenseLayer::forward(std::vector<float> &input)
+std::vector<float> SeqDenseLayer::forward(const std::vector<float> &input)
 {
     // TODO : rightnow all layers use sigmoid, create a new class member to store which activation function is to be used.
     if (input.size() != inputCount)

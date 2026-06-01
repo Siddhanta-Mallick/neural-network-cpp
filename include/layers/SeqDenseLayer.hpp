@@ -12,7 +12,7 @@ private:
 
 public:
     SeqDenseLayer(unsigned int neuronCount, unsigned int inputCount);
-    std::vector<float> forward(std::vector<float> &input) override;
+    std::vector<float> forward(const std::vector<float> &input) override;
     std::vector<float> backward(std::vector<float> gradOutput) override;
     void printLayer(int layerId = -1);
     void update(float lr) override;
