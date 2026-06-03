@@ -9,6 +9,7 @@ private:
     std::vector<float> bias;
     unsigned int neuronCount;
     unsigned int inputCount;
+    std::vector<float> z;
 
 public:
     SeqDenseLayer(unsigned int neuronCount, unsigned int inputCount);

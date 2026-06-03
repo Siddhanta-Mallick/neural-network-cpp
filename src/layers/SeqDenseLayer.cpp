@@ -11,7 +11,8 @@ SeqDenseLayer::SeqDenseLayer(unsigned int neuronCount, unsigned int inputCount)
     : neuronCount(neuronCount),
       inputCount(inputCount),
       weightMatrix(neuronCount, std::vector<float>(inputCount)),
-      bias(neuronCount)
+      bias(neuronCount),
+      z(neuronCount, 0.0f)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -49,9 +50,9 @@ std::vector<float> SeqDenseLayer::forward(const std::vector<float> &input)
     for (unsigned int i = 0; i < neuronCount; ++i)
     {
         for (unsigned int j = 0; j < inputCount; ++j)
-            y[i] += input[j] * weightMatrix[i][j];
-        y[i] += bias[i];
-        y[i] = Activation::Sigmoid(y[i]);
+            z[i] += input[j] * weightMatrix[i][j];
+        z[i] += bias[i];
+        y[i] = Activation::Sigmoid(z[i]);
     }
 
     return y;
