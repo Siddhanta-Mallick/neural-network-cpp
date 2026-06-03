@@ -7,9 +7,12 @@ class SeqDenseLayer : public ILayer
 private:
     std::vector<std::vector<float>> weightMatrix;
     std::vector<float> bias;
+    std::vector<std::vector<float>> gradWeightMatrix;
+    std::vector<float> gradBias;
     unsigned int neuronCount;
     unsigned int inputCount;
     std::vector<float> z;
+    std::vector<float> input;
 
 public:
     SeqDenseLayer(unsigned int neuronCount, unsigned int inputCount);
