@@ -35,12 +35,27 @@ std::vector<float> SeqNN::forward(const std::vector<float> &input)
 
 std::vector<float> SeqNN::backward(const std::vector<float> &grad_output)
 {
+    std::vector<float> current_grad = grad_output;
+    // Iterate through layers in reverse order for backpropagation
+    for (int i = static_cast<int>(layers.size()) - 1; i >= 0; --i)
+    {
+        current_grad = layers[i]->backward(current_grad);
+    }
+    return current_grad;
 }
 void SeqNN::update(float learning_rate)
 {
+    for (auto layer : layers)
+    {
+        layer->update(learning_rate);
+    }
 }
 void SeqNN::zero_grad()
 {
+    for (auto layer : layers)
+    {
+        layer->zero_grad();
+    }
 }
 void SeqNN::printNetwork()
 {
