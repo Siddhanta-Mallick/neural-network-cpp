@@ -12,6 +12,8 @@ SeqDenseLayer::SeqDenseLayer(unsigned int neuronCount, unsigned int inputCount)
       inputCount(inputCount),
       weightMatrix(neuronCount, std::vector<float>(inputCount)),
       bias(neuronCount),
+      gradWeightMatrix(neuronCount, std::vector<float>(inputCount, 0.0f)),
+      gradBias(neuronCount, 0.0f),
       z(neuronCount, 0.0f)
 {
     std::random_device rd;
@@ -42,11 +44,13 @@ void SeqDenseLayer::printLayer(int layerId)
 
 std::vector<float> SeqDenseLayer::forward(const std::vector<float> &input)
 {
+    this->input = std::vector<float>(input);
     // TODO : rightnow all layers use sigmoid, create a new class member to store which activation function is to be used.
     if (input.size() != inputCount)
         throw std::runtime_error("Dimensions of input and weight matrix do not match");
 
     std::vector<float> y(neuronCount, 0.0);
+    std::fill(z.begin(), z.end(), 0.0f);
     for (unsigned int i = 0; i < neuronCount; ++i)
     {
         for (unsigned int j = 0; j < inputCount; ++j)
@@ -57,12 +61,54 @@ std::vector<float> SeqDenseLayer::forward(const std::vector<float> &input)
 
     return y;
 }
-std::vector<float> SeqDenseLayer::backward(std::vector<float> gradOutput)
+std::vector<float> SeqDenseLayer::backward(std::vector<float> gradOutput_l)
 {
+    std::vector<float> delta_l(neuronCount);
+    for (unsigned int i = 0; i < neuronCount; ++i)
+    {
+        // delta^(l)_i = dL/da^(l)_i * sigma'(z^(l)_i)
+        delta_l[i] = gradOutput_l[i] * Activation::SigmoidDerivative(z[i]);
+    }
+
+    for (unsigned int i = 0; i < neuronCount; ++i)
+    {
+        for (unsigned int j = 0; j < inputCount; ++j)
+        {
+            // dL/dW^(l)_ij = delta^(l)_i * a^(l-1)_j
+            gradWeightMatrix[i][j] += delta_l[i] * input[j];
+        }
+        // dL/db^(l)_i = delta^(l)_i
+        gradBias[i] += delta_l[i];
+    }
+
+    std::vector<float> gradOutput_prev(inputCount, 0.0f);
+    for (unsigned int j = 0; j < inputCount; ++j)
+    {
+        for (unsigned int i = 0; i < neuronCount; ++i)
+        {
+            // dL/da^(l-1)_j = sum_i ( delta^(l)_i * W^(l)_ij )
+            gradOutput_prev[j] += delta_l[i] * weightMatrix[i][j];
+        }
+    }
+
+    return gradOutput_prev;
 }
 void SeqDenseLayer::update(float lr)
 {
+    for (unsigned int i = 0; i < neuronCount; ++i)
+    {
+        for (unsigned int j = 0; j < inputCount; ++j)
+        {
+            weightMatrix[i][j] -= lr * gradWeightMatrix[i][j];
+        }
+        bias[i] -= lr * gradBias[i];
+    }
 }
 void SeqDenseLayer::zero_grad()
 {
+    for (unsigned int i = 0; i < neuronCount; ++i)
+    {
+        std::fill(gradWeightMatrix[i].begin(), gradWeightMatrix[i].end(), 0.0f);
+        gradBias[i] = 0.0f;
+    }
 }
